@@ -1480,6 +1480,8 @@
  */
 #define DLT_ATSC_ALP		289
 
+#define DLT_RPMSG 290
+
 /*
  * In case the code that includes this file (directly or indirectly)
  * has also included OS files that happen to define DLT_MATCHING_MAX,
@@ -1490,7 +1492,7 @@
 #ifdef DLT_MATCHING_MAX
 #undef DLT_MATCHING_MAX
 #endif
-#define DLT_MATCHING_MAX	289	/* highest value in the "matching" range */
+#define DLT_MATCHING_MAX	290	/* highest value in the "matching" range */
 
 /*
  * DLT and savefile link type values are split into a class and

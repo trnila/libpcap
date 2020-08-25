@@ -129,6 +129,8 @@ struct rtentry;		/* declarations in <net/if.h> */
 #include "pcap-airpcap.h"
 #endif
 
+#include "pcap-rpmsg.h"
+
 #ifdef _WIN32
 /*
  * DllMain(), required when built as a Windows DLL.
@@ -329,7 +331,7 @@ PCAP_API char pcap_version[];
 PCAP_API_DEF char pcap_version[] = PACKAGE_VERSION;
 
 static void
-pcap_set_not_initialized_message(pcap_t *pcap)
+xpcap_set_not_initialized_message(pcap_t *pcap)
 {
 	if (pcap->activated) {
 		/* A module probably forgot to set the function pointer */
@@ -341,6 +343,8 @@ pcap_set_not_initialized_message(pcap_t *pcap)
 	(void)snprintf(pcap->errbuf, sizeof(pcap->errbuf),
 	    "This handle hasn't been activated yet");
 }
+
+#define pcap_set_not_initialized_message(a) snprintf(pcap->errbuf, sizeof(pcap->errbuf), "%d", __LINE__)
 
 static int
 pcap_read_not_initialized(pcap_t *pcap, int cnt _U_, pcap_handler callback _U_,
@@ -698,6 +702,7 @@ static struct capture_source_type {
 #ifdef HAVE_AIRPCAP_API
 	{ airpcap_findalldevs, airpcap_create },
 #endif
+  { rpmsg_findalldevs, rpmsg_create },
 	{ NULL, NULL }
 };
 

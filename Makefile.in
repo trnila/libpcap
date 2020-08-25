@@ -360,6 +360,8 @@ EXTRA_DIST = \
 	pcap-tc.h \
 	pcap-usb-linux.c \
 	pcap-usb-linux.h \
+	pcap-rpmsg.c \
+	pcap-rpmsg.h \
 	rpcap-protocol.c \
 	rpcapd/CMakeLists.txt \
 	rpcapd/Makefile.in \

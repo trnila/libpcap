@@ -1716,6 +1716,7 @@ init_linktype(compiler_state_t *cstate, pcap_t *p)
 			cstate->off_nl_nosnap = OFFSET_NOT_SET;
 		} else {
 			bpf_set_error(cstate, "unknown data link type %d", cstate->linktype);
+      printf("%d\n", DLT_MATCHING_MAX);
 			return (-1);
 		}
 		break;
