@@ -37,35 +37,50 @@ struct rpmsg_header {
   uint16_t flags;
 };
 
+struct rpmsg_mon_header {
+  uint64_t timestamp;
+  uint32_t interface;
+  uint16_t vq;
+  uint16_t len;
+  struct rpmsg_header hdr;
+};
+
 static int
 rpmsg_read(pcap_t *handle, int max_packets _U_, pcap_handler callback, u_char *user) {
   int read_ret;
-  struct rpmsg_header *header = handle->buffer;
+  int count = 0;
+  struct rpmsg_mon_header *header = handle->buffer;
+  char *p;
 
-	do {
-		read_ret = read(handle->fd, handle->buffer, 4096);
+  while(1)
+  {
 		if (handle->break_loop)
 		{
 			handle->break_loop = 0;
-			return -2;
+			return PCAP_ERROR_BREAK;
 		}
-	} while ((read_ret == -1) && (errno == EINTR));
-	if (read_ret < 0)
-	{
-		if (errno == EAGAIN)
-			return 0;	/* no data there */
+		read_ret = read(handle->fd, handle->buffer, handle->bufsize);
+    if(read_ret < 0) {
+      if(errno == EAGAIN) {
+        return 0;
+      }
+      pcap_fmt_errmsg_for_errno(handle->errbuf, PCAP_ERRBUF_SIZE,
+          errno, "Can't read from fd %d", handle->fd);
+      return -1;
+    }
 
-		pcap_fmt_errmsg_for_errno(handle->errbuf, PCAP_ERRBUF_SIZE,
-		    errno, "Can't read from fd %d", handle->fd);
-		return -1;
-	}
+    header = handle->buffer;
 
-	struct pcap_pkthdr pkth;
-  pkth.ts.tv_sec = 1;
-  pkth.ts.tv_usec = 0;
-  pkth.caplen = pkth.len = header->length + sizeof(struct rpmsg_header);
-  callback(user, &pkth, handle->buffer);
-  return 1;
+    struct pcap_pkthdr pkth;
+    pkth.ts.tv_sec = header->timestamp / 1000000000UL;
+    pkth.ts.tv_usec = header->timestamp % 1000000000UL;
+    pkth.caplen = pkth.len = header->hdr.length + sizeof(struct rpmsg_mon_header);
+
+    callback(user, &pkth, handle->buffer);
+    count++;
+  }
+
+  return count;
 }
 
 static int rpmsg_activate(pcap_t* handle) {
